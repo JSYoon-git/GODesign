@@ -40,14 +40,19 @@
   - 확인 못 함: 게시본에서 페이지 이동(상품 상세 ?id=, 카테고리, 검색)이 되는지. 안 되면 주소 방식 변경 필요
 
 ## 서버 1~3단계 (2026-10-07) — 미니PC + SQLite 계획 중
-- 서버 폴더: ../godesign-server (git 저장소 아님, 비공개 저장소로 만들지 결정 필요)
+- 서버 폴더: ../godesign-server — 비공개 저장소 https://github.com/JSYoon-git/godesign-server
 - 실행: `.claude/launch.json`의 "api"(npm run dev, 3000포트). 처음 한 번 `npm run seed`로 data.js 상품을 DB에 넣음
 - [완료] 1. 서버 골격(Hono, SQLite data/shop.db, 테이블 5개)
 - [완료] 2. 상품 API: GET /api/products, /api/products/:id — data.js와 같은 12개·같은 가격 확인
 - [완료] 3. 주문 생성: POST /api/orders — 금액은 서버가 계산(가격 위조 무시, 패키지 1건 고정, 배송비 규칙). 장바구니 버튼 연결(localhost에서만)
 - 로컬 확인: 다른 채팅이 8080을 쓰면 "shop-8081"(8081포트)로 사이트를 띄움
 
+## 관리자 페이지 (2026-10-07)
+- [완료] A1. 관리자 로그인 (/admin) — 자동 테스트 14개 통과
+- 사용자 할 일: npm run admin-password → .env에 ADMIN_ID, ADMIN_PASSWORD_HASH 넣고 서버 재시작
+- 6단계 체크: 서버는 반드시 Cloudflare 터널로만 공개 (로그인 잠금이 cf-connecting-ip 기준)
+
 ## 다음 할 일
-1. 관리자 페이지 (상품·사진·설명 수정) — 계획 승인 대기
+1. A2 상품 관리 화면 — 사용자가 "아직 하지 말 것"이라고 함. 지시 기다리기 (그다음 A3 사진 업로드, A4 사이트를 API로 전환)
 2. 4. 포트원 테스트 결제 (PG사 결정 필요) → 5. 로그인 → 6. 미니PC 배포 → 7. 백업·알림
 3. 사이트 이름, 사업자 정보, 상품 데이터·사진 채우기
