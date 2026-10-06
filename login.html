@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>로그인</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/print.css">
+</head>
+<body data-page="login" class="paper">
+  <main class="auth">
+    <h1>로그인</h1>
+    <form id="login-form">
+      <div class="fields">
+        <input type="email" name="email" placeholder="이메일" aria-label="이메일" autocomplete="email" required>
+        <input type="password" name="password" placeholder="비밀번호" aria-label="비밀번호" autocomplete="current-password" required>
+      </div>
+      <label class="check"><input type="checkbox" name="keep" checked>로그인상태유지</label>
+      <button class="btn outline block">로그인</button>
+    </form>
+    <div class="auth-links">
+      <a href="#" data-soon>회원가입</a>
+      <a href="#" data-soon>아이디 · 비밀번호 찾기</a>
+    </div>
+    <p class="or">또는</p>
+    <button class="btn guest block" data-soon>비회원 주문배송 조회</button>
+    <p class="notice" id="notice" aria-live="polite"></p>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/print.js"></script>
+  <script>
+    // 화면만 구현. 실제 로그인은 서버가 생기면 연결한다.
+    const notice = document.getElementById('notice');
+    const msg = '로그인과 주문 조회는 서버를 연결한 뒤 동작해요. 지금은 화면만 있습니다.';
+    document.getElementById('login-form').addEventListener('submit', (e) => { e.preventDefault(); notice.textContent = msg; });
+    document.querySelectorAll('[data-soon]').forEach((el) => el.addEventListener('click', (e) => { e.preventDefault(); notice.textContent = msg; }));
+  </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>상품</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/print.css">
+</head>
+<body data-page="product" class="paper">
+  <main class="wrap" id="main"></main>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/print.js"></script>
+  <script>
+    const main = document.getElementById('main');
+    const p = findProduct(qs.get('id'));
+    const GIFT = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="18" height="13"/><path d="M3 12h18M12 8v13M12 8c-1.5-3-5-4-5-1.5S10 8 12 8zm0 0c1.5-3 5-4 5-1.5S14 8 12 8z"/></svg>';
+    const SHARE = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.6M8.2 13.2l7.6 4.6"/></svg>';
+    const HEART = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 20s-7.5-4.6-9-9.3C2 7.5 4 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.2 0 5.2 3 4.2 6.2-1.5 4.7-9 9.3-9 9.3z"/></svg>';
+
+    if (!p) {
+      main.innerHTML = `<div class="empty">
+        <p class="empty-title">찾는 상품이 없어요</p>
+        <p>판매가 끝났거나 주소가 잘못되었어요.</p>
+        <a class="btn primary small" href="shop.html">상품 둘러보기</a>
+      </div>`;
+    } else {
+      const svc = isService(p); // 패키지면 사양·전달·환불 규정이 붙고 수량은 1건
+      document.title = `${p.name} | ${SITE.name}`;
+      const point = svc ? 0 : Math.round(p.price * SITE.pointRate); // 적립은 인쇄물 상품만
+
+      // 사진: 패키지는 3D 책 + 표지 그래픽, 상품은 등록한 사진(없으면 자리표시 2장)
+      // 사진 없는 상품은 목업 + 그림 확대
+      const mocked = !svc && !p.images.length && p.mock;
+      const art = svc ? p.cover : p.mock;
+      const slides = svc || mocked
+        ? [`<div class="slide-stage">${svc ? book(p.en, p.cover, 'book-detail') : productMock(p, 'mock-lg')}</div>`,
+           `<div class="slide-stage"><div class="page-art crop detail-art theme-${art.theme}">${riso(art)}</div></div>`]
+        : (p.images.length ? p.images : ['', '']).map((_, i) => productImg(p, i));
+      // 썸네일도 큰 사진과 같은 순서: 1번 표지, 2번 그림 확대
+      const thumbs = svc || mocked
+        ? [coverThumb(p), `<div class="thumb-art theme-${art.theme}">${riso(art)}</div>`]
+        : slides.map((_, i) => productImg(p, i));
+
+      const crumb = svc
+        ? `<a href="index.html">홈</a><span>›</span><a href="service.html">서비스</a>`
+        : `<a href="index.html">홈</a><span>›</span><a href="shop.html">상점</a><span>›</span><a href="shop.html?cat=${p.category}">${CATEGORIES.find((c) => c.id === p.category).label}</a>`;
+
+      const rows = (point ? `<dt>적립</dt><dd><b>${point.toLocaleString('ko-KR')}</b>포인트 <b>적립 예정</b> <button class="qmark" data-soon aria-label="적립 안내">?</button></dd>` : '') +
+        (svc
+          ? `<dt>작업 기간</dt><dd><b>${p.period}</b></dd><dt>시안</dt><dd>${p.drafts}</dd><dt>수정</dt><dd>${p.revisions}</dd><dt>전달</dt><dd>${p.delivery}</dd>`
+          : (p.spec ? `<dt>사양</dt><dd>${esc(p.spec)}</dd>` : '') + `<dt>배송</dt><dd><b>택배 · ${won(SITE.shippingFee)}</b><br>${won(SITE.freeShippingOver)} 이상 구매 시 무료배송</dd>`);
+
+      const pick = svc
+        ? `<div class="qty-box"><p>선택한 패키지</p><div class="qty-row"><span>${esc(p.name)} 1건</span><span>${won(p.price)}</span></div></div>`
+        : `<div class="qty-box">
+            <p>수량</p>
+            <div class="qty-row">
+              <div class="qty">
+                <button type="button" id="minus" aria-label="수량 줄이기">−</button>
+                <input id="qty" type="number" min="1" max="99" value="1" aria-label="수량">
+                <button type="button" id="plus" aria-label="수량 늘리기">+</button>
+              </div>
+              <span id="line-price">${won(p.price)}</span>
+            </div>
+          </div>`;
+
+      const detail = svc
+        ? `<div class="detail-body svc-detail">
+            <p>${esc(p.summary)}</p>
+            <h3>포함 내역</h3><ul>${p.includes.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+            <h3>진행 방법</h3><p>결제를 마치면 의뢰서 작성 안내를 받으실 수 있어요. 원고와 원하는 분위기를 보내주시면 작업을 시작해요.</p>
+          </div>
+          <section class="refund"><h3>취소·환불 규정</h3><ul>${SERVICE_REFUND.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></section>`
+        : `<div class="detail-body collapsed" id="detail-body">
+            <p>${esc(p.summary)}</p>
+            <p>상품 상세 설명이 들어갈 자리입니다. 판형, 쪽수, 종이, 인쇄 방식, 제본을 적어 주세요.</p>
+            <p>리소 인쇄물은 한 장씩 잉크가 조금씩 다르게 찍혀요. 이런 차이는 불량이 아니라는 점을 미리 적어 두면 교환 문의가 줄어듭니다.</p>
+            <p>교환·반품 안내: 상품 수령 후 7일 이내 고객센터로 연락 주세요.</p>
+          </div>
+          <button class="btn detail-more" id="more" aria-expanded="false" aria-controls="detail-body">상세정보 펼쳐보기</button>`;
+
+      main.innerHTML = `
+        <nav class="crumb" aria-label="현재 위치">${crumb}</nav>
+        <div class="pd">
+          <div class="pd-gallery">
+            <div class="gallery" id="gallery" aria-label="사진">${slides.map((x) => `<div class="slide">${x}</div>`).join('')}</div>
+            <span class="gallery-count" id="gallery-count">1 / ${slides.length}</span>
+            <div class="thumbs" id="thumbs">${thumbs.map((x, i) => `<button type="button" aria-label="사진 ${i + 1}" aria-current="${i === 0}">${x}</button>`).join('')}</div>
+          </div>
+
+          <div class="pd-info">
+            <h1 class="pd-title">${esc(p.name)}${badgesHtml(p)}</h1>
+            <div class="pd-price-row">
+              <p class="pd-price">${priceHtml(p)}</p>
+              <div class="pd-icons">
+                <button class="icon-btn" data-soon aria-label="공유하기">${SHARE}</button>
+                <button class="icon-btn" data-soon aria-label="찜하기">${HEART}<span>0</span></button>
+              </div>
+            </div>
+            <p class="pd-summary">${esc(p.summary)}</p>
+            <dl class="pd-rows">${rows}</dl>
+
+            <div class="buy-panel" id="buy-panel">
+              <button class="sheet-close" type="button" id="sheet-close" aria-label="구매 창 닫기"></button>
+              ${pick}
+              <div class="pd-total">
+                <span>${svc ? '총 결제금액' : '총 상품금액(<span id="qty-label">1</span>개)'}</span>
+                <strong id="total">${won(p.price)}</strong>
+              </div>
+              <div class="pd-btns">
+                <button class="btn primary" id="buy">구매하기</button>
+                ${svc ? '' : `<button class="btn" data-soon>${GIFT}선물하기</button>`}
+                <button class="btn" id="add">장바구니</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button role="tab" aria-selected="true" aria-controls="tab-detail">상세정보</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-review">구매평<small>(0)</small></button>
+          <button role="tab" aria-selected="false" aria-controls="tab-qna">Q&amp;A<small>(0)</small></button>
+        </div>
+        <div class="tab-panel" id="tab-detail" role="tabpanel">${detail}</div>
+        <div class="tab-panel" id="tab-review" role="tabpanel" hidden>
+          <div class="tab-empty"><p>아직 작성된 구매평이 없어요.</p><button class="btn" data-soon>구매평 쓰기</button></div>
+        </div>
+        <div class="tab-panel" id="tab-qna" role="tabpanel" hidden>
+          <div class="tab-empty"><p>아직 등록된 문의가 없어요.</p><button class="btn" data-soon>문의하기</button></div>
+        </div>
+
+        <div class="sheet-dim" id="sheet-dim"></div>
+        <div class="m-buybar">
+          ${svc ? '' : `<button class="btn" data-soon>${GIFT}선물하기</button>`}
+          <button class="btn primary" id="open-sheet">구매하기</button>
+        </div>`;
+      drawIn(main);
+
+      // 수량·금액 (상품만)
+      const qtyInput = document.getElementById('qty');
+      const getQty = () => (qtyInput ? Math.min(99, Math.max(1, parseInt(qtyInput.value, 10) || 1)) : 1);
+      if (qtyInput) {
+        const updateTotal = () => {
+          const q = getQty();
+          qtyInput.value = q;
+          document.getElementById('qty-label').textContent = q;
+          document.getElementById('line-price').textContent = won(p.price * q);
+          document.getElementById('total').textContent = won(p.price * q);
+        };
+        document.getElementById('minus').onclick = () => { qtyInput.value = getQty() - 1; updateTotal(); };
+        document.getElementById('plus').onclick = () => { qtyInput.value = getQty() + 1; updateTotal(); };
+        qtyInput.onchange = updateTotal;
+      }
+
+      document.getElementById('buy').onclick = () => { addToCart(p.id, getQty()); location.href = 'cart.html'; };
+      document.getElementById('add').onclick = () => {
+        const added = addToCart(p.id, getQty());
+        setSheet(false);
+        showToast(added ? '장바구니에 담았어요' : '이미 장바구니에 담긴 패키지예요', 'cart.html', '장바구니 보기');
+      };
+
+      // 서버가 있어야 하는 기능은 안내만
+      main.querySelectorAll('[data-soon]').forEach((el) => el.addEventListener('click', () => showToast(SOON)));
+
+      // 사진: 모바일은 손가락으로 넘김, PC는 썸네일 클릭
+      const gallery = document.getElementById('gallery');
+      const thumbBtns = [...document.querySelectorAll('#thumbs button')];
+      const show = (i) => {
+        document.getElementById('gallery-count').textContent = `${i + 1} / ${slides.length}`;
+        thumbBtns.forEach((t, j) => t.setAttribute('aria-current', i === j));
+      };
+      gallery.addEventListener('scroll', () => show(Math.round(gallery.scrollLeft / gallery.clientWidth)), { passive: true });
+      thumbBtns.forEach((t, i) => t.addEventListener('click', () => {
+        gallery.scrollTo({ left: i * gallery.clientWidth, behavior: reduceMotion ? 'auto' : 'smooth' });
+      }));
+
+      // 모바일 구매 시트
+      const panel = document.getElementById('buy-panel');
+      const dim = document.getElementById('sheet-dim');
+      function setSheet(open) { panel.classList.toggle('open', open); dim.classList.toggle('open', open); }
+      document.getElementById('open-sheet').onclick = () => setSheet(true);
+      document.getElementById('sheet-close').onclick = () => setSheet(false);
+      dim.onclick = () => setSheet(false);
+      addEventListener('keydown', (e) => { if (e.key === 'Escape') setSheet(false); });
+
+      // 탭
+      const tabs = [...document.querySelectorAll('[role="tab"]')];
+      tabs.forEach((tab) => tab.addEventListener('click', () => {
+        tabs.forEach((t) => {
+          const on = t === tab;
+          t.setAttribute('aria-selected', on);
+          document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+        });
+      }));
+
+      // 상세정보 펼치기 (상품만)
+      const more = document.getElementById('more');
+      if (more) more.onclick = () => {
+        const open = !document.getElementById('detail-body').classList.toggle('collapsed');
+        more.textContent = open ? '상세정보 접기' : '상세정보 펼쳐보기';
+        more.setAttribute('aria-expanded', open);
+      };
+    }
+  </script>
+</body>
+</html>

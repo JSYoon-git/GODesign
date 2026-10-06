@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>작업물</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/print.css">
+</head>
+<body data-page="work" class="paper">
+  <main class="wrap">
+    <section class="page-top">
+      <div class="sec-head">
+        <h1>작업물</h1>
+        <p>화살표를 누르거나 옆으로 밀어 넘겨보세요.</p>
+      </div>
+      <div class="spread-wrap" id="spread-root"></div>
+    </section>
+    <section class="section">
+      <div class="sec-head"><h2>전체 목록</h2></div>
+      <div class="work-grid" id="work-grid"></div>
+    </section>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/print.js"></script>
+  <script>
+    const viewer = mountSpread(document.getElementById('spread-root'));
+    document.getElementById('work-grid').innerHTML = WORKS.map((w, i) => `
+      <a class="work-card" href="#${w.id}" data-i="${i}">
+        <div class="page-art crop theme-${w.art.theme}">${riso(w.art)}</div>
+        <h3>${esc(w.title)}</h3>
+        <p>${esc(w.kind)}</p>
+      </a>`).join('');
+    drawIn(document);
+
+    // 주소의 #w2 같은 표시로 해당 작업을 펼침
+    function openFromHash() {
+      const i = WORKS.findIndex((w) => '#' + w.id === location.hash);
+      if (i < 0) return;
+      viewer.go(i);
+      document.getElementById('spread-root').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+    }
+    addEventListener('hashchange', openFromHash);
+    openFromHash();
+  </script>
+</body>
+</html>

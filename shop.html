@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>상점</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/print.css">
+</head>
+<body data-page="shop" class="paper">
+  <main class="wrap">
+    <ul class="cats" id="cats" aria-label="카테고리"></ul>
+    <p class="search-info" id="search-info" hidden></p>
+    <div id="list"></div>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/print.js"></script>
+  <script>
+    const cat = qs.get('cat') || 'all';
+    const q = (qs.get('q') || '').trim();
+
+    document.getElementById('cats').innerHTML = CATEGORIES.map((c) =>
+      `<li><a href="shop.html${c.id === 'all' ? '' : '?cat=' + c.id}"${c.id === cat && !q ? ' class="is-active" aria-current="page"' : ''}>${c.label}</a></li>`
+    ).join('');
+
+    // 이름·영문명(패키지 en, 상품 표지 제목)·설명·사양에서 찾음 (영문 대소문자 무시)
+    const hit = (p) => [p.name, p.en, p.mock && p.mock.title, p.summary, p.spec].some((t) => t && t.toLowerCase().includes(q.toLowerCase()));
+    const list = PRODUCTS.filter((p) => (cat === 'all' || p.category === cat) && (!q || hit(p)));
+    const svcs = q ? SERVICES.filter(hit) : []; // 패키지는 검색할 때만 함께 보여줌
+
+    if (q) {
+      const info = document.getElementById('search-info');
+      info.textContent = `‘${q}’ 검색 결과 ${list.length + svcs.length}개`;
+      info.hidden = false;
+    }
+
+    document.getElementById('list').innerHTML = list.length || svcs.length
+      ? (svcs.length ? `<h2 class="result-head">패키지</h2><div class="pkg-grid">${svcs.map(pkgCard).join('')}</div>` : '') +
+        (svcs.length && list.length ? '<h2 class="result-head">상품</h2>' : '') +
+        (list.length ? `<div class="grid">${list.map(productCard).join('')}</div>` : '')
+      : `<div class="empty">
+           <p class="empty-title">찾는 상품이 없어요</p>
+           <p>다른 검색어를 입력하거나 전체 상품을 둘러보세요.</p>
+           <a class="btn primary small" href="shop.html">전체 상품 보기</a>
+         </div>`;
+    drawIn(document);
+  </script>
+</body>
+</html>

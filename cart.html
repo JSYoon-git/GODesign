@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>장바구니</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/print.css">
+</head>
+<body data-page="cart" class="paper">
+  <main class="wrap cart-page">
+    <div class="cart-head">
+      <h1>장바구니</h1>
+      <span class="count" id="head-count">0</span>
+    </div>
+    <div id="cart"></div>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/print.js"></script>
+  <script>
+    const box = document.getElementById('cart');
+
+    function render() {
+      const items = getCart().map((it) => ({ ...it, p: findProduct(it.id) }));
+      document.getElementById('head-count').textContent = cartCount();
+
+      if (!items.length) {
+        box.innerHTML = `<div class="empty">
+          <p class="empty-title">장바구니에 담긴 상품이 없어요</p>
+          <p>원하는 상품을 담아보세요!</p>
+          <a class="btn primary small" href="shop.html">상품 둘러보기</a>
+        </div>`;
+        return;
+      }
+
+      // 화면 표시용 금액. 실제 결제 금액은 서버에서 다시 계산해야 한다.
+      // 배송비는 상품에만 붙음 (패키지는 파일 전달이거나 배송비 포함)
+      const subtotal = items.reduce((s, it) => s + it.p.price * it.qty, 0);
+      const goods = items.filter((it) => !isService(it.p)).reduce((s, it) => s + it.p.price * it.qty, 0);
+      const shipping = goods ? shippingFor(goods) : 0;
+
+      box.innerHTML = `<div class="cart">
+        <ul class="cart-list">
+          ${items.map(({ p, qty }) => `
+            <li class="cart-item" data-id="${p.id}">
+              <a class="cart-thumb" href="product.html?id=${p.id}">${isService(p) || (!p.images[0] && p.mock) ? coverThumb(p) : productImg(p, 0)}</a>
+              <div>
+                <a class="cart-item-name" href="product.html?id=${p.id}">${esc(p.name)}</a>
+                ${isService(p)
+                  ? `<p class="cart-item-unit">패키지 1건 / 작업 기간 ${p.period}</p>`
+                  : `<p class="cart-item-unit">${won(p.price)}</p>
+                <div class="qty">
+                  <button type="button" data-action="dec" aria-label="${esc(p.name)} 수량 줄이기">−</button>
+                  <input type="number" min="1" max="99" value="${qty}" data-action="set" aria-label="${esc(p.name)} 수량">
+                  <button type="button" data-action="inc" aria-label="${esc(p.name)} 수량 늘리기">+</button>
+                </div>`}
+              </div>
+              <div class="cart-item-right">
+                <strong>${won(p.price * qty)}</strong>
+                <button type="button" class="link-btn" data-action="remove">삭제</button>
+              </div>
+            </li>`).join('')}
+        </ul>
+
+        <aside class="summary" aria-label="주문 금액">
+          <dl>
+            <dt>상품금액</dt><dd>${won(subtotal)}</dd>
+            <dt>배송비</dt><dd>${shipping ? won(shipping) : '무료'}</dd>
+            <dt class="grand">결제 예정 금액</dt><dd class="grand">${won(subtotal + shipping)}</dd>
+          </dl>
+          ${shipping ? `<p class="hint">상품을 ${won(SITE.freeShippingOver - goods)} 더 담으면 무료배송이에요.</p>` : ''}
+          <button class="btn primary block" id="order">주문하기</button>
+          <p class="notice" id="order-notice" aria-live="polite"></p>
+        </aside>
+      </div>`;
+      drawIn(box);
+    }
+
+    box.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      if (btn.id === 'order') {
+        document.getElementById('order-notice').textContent = '결제 연결은 다음 단계에서 추가돼요. 지금은 화면만 동작합니다.';
+        return;
+      }
+      const item = btn.closest('.cart-item');
+      const action = btn.dataset.action;
+      if (!item || !action) return;
+      const id = item.dataset.id;
+      const cur = getCart().find((x) => x.id === id).qty;
+      if (action === 'inc') setQty(id, cur + 1);
+      if (action === 'dec') setQty(id, cur - 1);
+      if (action === 'remove') removeFromCart(id);
+      render();
+    });
+    box.addEventListener('change', (e) => {
+      if (e.target.dataset.action !== 'set') return;
+      setQty(e.target.closest('.cart-item').dataset.id, parseInt(e.target.value, 10) || 1);
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

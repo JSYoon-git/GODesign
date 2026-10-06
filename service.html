@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>서비스</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/print.css">
+</head>
+<body data-page="service" class="paper">
+  <main class="wrap">
+    <section class="page-top">
+      <div class="sec-head">
+        <h1>서비스 패키지</h1>
+        <p>정해진 가격과 일정으로 맡길 수 있어요.<br>모든 가격은 부가세 포함이에요.</p>
+      </div>
+      <div class="pkg-grid" id="pkg-grid"></div>
+    </section>
+    <section class="section">
+      <div class="sec-head"><h2>한눈에 비교</h2><p>표가 잘리면 옆으로 밀어서 보세요.</p></div>
+      <div class="cmp-scroll"><table class="cmp" id="cmp"></table></div>
+    </section>
+    <section class="section">
+      <div class="sec-head"><h2>진행 순서</h2></div>
+      <div id="process-steps"></div>
+    </section>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/print.js"></script>
+  <script>
+    document.getElementById('pkg-grid').innerHTML = SERVICES.map(pkgCard).join('');
+    document.getElementById('process-steps').innerHTML = processHtml();
+
+    // 비교표: 항목 × 패키지
+    const row = (label, fn, cls = '') => `<tr><th scope="row">${label}</th>${SERVICES.map((x) => `<td class="${cls}">${fn(x)}</td>`).join('')}</tr>`;
+    document.getElementById('cmp').innerHTML = `
+      <thead><tr><th scope="col"><span class="sr-only">항목</span></th>${SERVICES.map((x) => `<th scope="col"><a href="product.html?id=${x.id}">${esc(x.name)}</a></th>`).join('')}</tr></thead>
+      <tbody>
+        ${row('가격', priceHtml, 'num')}
+        ${row('작업 기간', (x) => x.period)}
+        ${row('시안', (x) => x.drafts)}
+        ${row('수정', (x) => x.revisions)}
+        ${row('포함 내역', (x) => `<ul>${x.includes.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`)}
+        ${row('전달', (x) => x.delivery)}
+      </tbody>
+      <tfoot><tr><td></td>${SERVICES.map((x) => `<td><a class="btn line" href="product.html?id=${x.id}">자세히 보기</a></td>`).join('')}</tr></tfoot>`;
+    drawIn(document);
+  </script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/print.css">
+</head>
+<body data-page="home" class="paper">
+  <!-- 오프닝은 첫 방문에 한 번만. 이미 봤거나 "동작 줄이기"면 그리기 전에 숨김 -->
+  <script>
+    try { if (sessionStorage.getItem('introSeen') || matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('no-intro'); }
+    catch (e) { document.documentElement.classList.add('no-intro'); }
+  </script>
+  <div class="intro" id="intro" aria-hidden="true">
+    <div class="intro-book">
+      <div class="intro-page"><p>원고를<br>책으로</p></div>
+      <div class="intro-cover theme-navy">
+        <div class="intro-front" id="intro-front"></div>
+        <div class="intro-inside"></div>
+      </div>
+    </div>
+  </div>
+  <main>
+    <!-- 첫 화면: 재단선이 있는 인쇄 전지 -->
+    <section class="hero-p">
+      <div class="sheet crop">
+        <svg class="reg-mark" viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="10" cy="10" r="5.5"/><path d="M10 0v20M0 10h20"/></svg>
+        <div class="hero-text">
+          <h1>원고를<br>책으로</h1>
+          <p class="lead">표지 디자인부터 내지 편집, 소량 인쇄까지 <br>정해진 가격과 일정으로 맡길 수 있어요.</p>
+          <div class="hero-cta">
+            <a class="btn ink" href="service.html">패키지 보기</a>
+            <a class="btn line" href="work.html">작업물 보기</a>
+          </div>
+        </div>
+        <div class="hero-visual" id="hero-visual"></div>
+        <div class="color-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      </div>
+    </section>
+
+    <!-- 패키지: 3D 책 -->
+    <section class="wrap section" id="services">
+      <div class="sec-head">
+        <h2>패키지</h2>
+        <p><a class="more-link" href="service.html">패키지 자세히 보기</a></p>
+      </div>
+      <div class="pkg-grid" id="pkg-grid"></div>
+    </section>
+
+    <!-- 작업물: 펼침면 뷰어 -->
+    <section class="wrap section" id="work">
+      <div class="sec-head">
+        <h2>작업물</h2>
+        <p><a class="more-link" href="work.html">작업물 전체 보기</a></p>
+      </div>
+      <div class="spread-wrap" id="spread-root"></div>
+    </section>
+
+    <!-- 진행 순서 -->
+    <section class="wrap section" id="process">
+      <div class="sec-head"><h2>진행 순서</h2></div>
+      <div id="process-steps"></div>
+    </section>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/print.js"></script>
+  <script>
+    // 첫 화면
+    const heroVisual = document.getElementById('hero-visual');
+    heroVisual.innerHTML = riso({ theme: 'paper', shape: 'sphere' }, 'hero-riso') +
+      book('견본집', { theme: 'navy', shape: 'vase' }, 'book-hero');
+
+    document.getElementById('pkg-grid').innerHTML = SERVICES.map(pkgCard).join('');
+    document.getElementById('process-steps').innerHTML = processHtml();
+    mountSpread(document.getElementById('spread-root'));
+
+    // 오프닝: 끝나면 제거, 클릭·스크롤·키 입력이 있으면 바로 끝냄
+    const intro = document.getElementById('intro');
+    if (document.documentElement.classList.contains('no-intro')) intro.remove();
+    else {
+      document.getElementById('intro-front').innerHTML = riso({ theme: 'navy', shape: 'vase' });
+      try { sessionStorage.setItem('introSeen', '1'); } catch (e) {}
+      const skip = () => intro.classList.add('skip');
+      ['pointerdown', 'wheel', 'touchstart', 'keydown'].forEach((t) => addEventListener(t, skip, { once: true, passive: true }));
+      intro.addEventListener('animationend', (e) => { if (e.target === intro) intro.remove(); });
+    }
+    drawIn(document);
+
+    // 효과: 마우스를 따라 책이 기울고, 두 잉크가 살짝 어긋남
+    if (!reduceMotion && matchMedia('(pointer: fine)').matches) {
+      const heroBook = heroVisual.querySelector('.book-hero');
+      addEventListener('mousemove', (e) => {
+        const mx = (e.clientX / innerWidth - 0.5) * 2, my = (e.clientY / innerHeight - 0.5) * 2;
+        heroVisual.style.setProperty('--mx', mx.toFixed(3));
+        heroVisual.style.setProperty('--my', my.toFixed(3));
+        heroBook.style.setProperty('--ry', `${14 + mx * 16}deg`);
+        heroBook.style.setProperty('--rx', `${my * -6}deg`);
+      });
+    }
+  </script>
+</body>
+</html>
