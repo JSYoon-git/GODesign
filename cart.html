@@ -82,7 +82,7 @@
       const btn = e.target.closest('button');
       if (!btn) return;
       if (btn.id === 'order') {
-        document.getElementById('order-notice').textContent = '결제 연결은 다음 단계에서 추가돼요. 지금은 화면만 동작합니다.';
+        order(btn);
         return;
       }
       const item = btn.closest('.cart-item');
@@ -95,6 +95,31 @@
       if (action === 'remove') removeFromCart(id);
       render();
     });
+    // 서버에 장바구니({id, qty})만 보내고, 금액은 서버가 계산한 값을 받는다
+    async function order(btn) {
+      const notice = document.getElementById('order-notice');
+      if (!SITE.api) {
+        notice.textContent = '결제 연결은 다음 단계에서 추가돼요. 지금은 화면만 동작합니다.';
+        return;
+      }
+      btn.disabled = true;
+      notice.textContent = '주문을 만드는 중이에요…';
+      try {
+        const res = await fetch(`${SITE.api}/api/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: getCart() }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        notice.textContent = `주문이 접수됐어요. 결제 금액 ${won(data.totalAmount)} (결제 연결은 다음 단계에서 추가돼요)`;
+      } catch (err) {
+        notice.textContent = err.message && err.message !== 'Failed to fetch' ? err.message : '서버에 연결하지 못했어요. 잠시 후 다시 시도해 주세요.';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
     box.addEventListener('change', (e) => {
       if (e.target.dataset.action !== 'set') return;
       setQty(e.target.closest('.cart-item').dataset.id, parseInt(e.target.value, 10) || 1);

@@ -39,3 +39,6 @@
 - 2026-10-07: 작업 방식 — 파일을 수정하면 바로 커밋하고 push(GitHub Pages 자동 반영). 공개 주소는 https://jsyoon-git.github.io/GODesign/
 - 2026-10-06: 공유는 claude.ai Artifact로 게시(기본 비공개, 공유는 직접). 로컬 서버는 캐시 끈 .claude/serve.py.
 - 2026-10-07: 서버는 집 미니PC(GMKtec) 24시간 운영, DB는 SQLite(파일 하나, 하루 100명 규모에 충분). 결제는 포트원 V2, 금액 검증은 서버에서.
+- 2026-10-07: 서버 코드는 GODesign 밖 040_Shop/godesign-server/ (Node.js + Hono + better-sqlite3). 공개 저장소에 .env·DB가 실수로 올라가지 않게 분리.
+- 2026-10-07: products 테이블은 금액 계산용 값(가격·종류·카테고리)만 칸으로, 화면 표시용 값(사양·설명·사진·목업)은 data(JSON) 칸에. 처음 데이터는 data.js에서 npm run seed로 가져옴(이미 있는 id는 건너뜀).
+- 2026-10-07: 사이트의 주문 버튼은 localhost에서 열 때만 API(http://localhost:3000)에 연결(SITE.api). 공개 사이트는 서버 배포 전까지 안내 문구만.

@@ -4,6 +4,8 @@ const SITE = {
   shippingFee: 3000,
   freeShippingOver: 50000,
   pointRate: 0.1, // 적립률 표시용 (0이면 적립 줄 숨김)
+  // 주문 API 서버 주소. 지금은 내 PC에서 열 때만 연결 (공개 사이트는 null → 주문 버튼은 안내만)
+  api: ['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://localhost:3000' : null,
   office: { address: '(사무실 주소)', phone: '02-000-0000', hours: '평일 10:00-19:00', email: 'hello@example.com' },
   showroom: null, // 쇼룸이 생기면 { address, phone, hours }
   // 통신판매 사이트는 사업자 정보 표시가 필요하다 (PG 심사 때도 확인함)
