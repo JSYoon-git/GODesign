@@ -33,7 +33,10 @@
 - 로컬 서버가 예전 CSS를 캐시하던 문제 → .claude/serve.py(no-store)로 교체
 - 모바일 메뉴 목차형으로 재디자인 + 사이트 문구 한글 통일 (280~1024px 확인, 키보드 Tab·ESC 확인)
 - 사이트 이름 지오디자인으로 변경 (280~1280px 헤더 겹침 확인)
-- 공유 링크 게시: https://claude.ai/artifact/Rh3txwGY5bnvL5AWujgy7h
+- 공개 사이트(GitHub Pages): https://jsyoon-git.github.io/GODesign/ — main에 push하면 1~2분 뒤 자동 갱신
+  - 확인함: 상품·패키지 상세(?id=), 카테고리, 검색, 작업물(#w3), 장바구니 담기
+- 저장소: https://github.com/JSYoon-git/GODesign
+- (이전) claude.ai 공유 링크: https://claude.ai/artifact/Rh3txwGY5bnvL5AWujgy7h
   - 확인 못 함: 게시본에서 페이지 이동(상품 상세 ?id=, 카테고리, 검색)이 되는지. 안 되면 주소 방식 변경 필요
 
 ## 다음 할 일
