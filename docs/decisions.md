@@ -42,3 +42,4 @@
 - 2026-10-07: 서버 코드는 GODesign 밖 040_Shop/godesign-server/ (Node.js + Hono + better-sqlite3). 공개 저장소에 .env·DB가 실수로 올라가지 않게 분리.
 - 2026-10-07: products 테이블은 금액 계산용 값(가격·종류·카테고리)만 칸으로, 화면 표시용 값(사양·설명·사진·목업)은 data(JSON) 칸에. 처음 데이터는 data.js에서 npm run seed로 가져옴(이미 있는 id는 건너뜀).
 - 2026-10-07: 사이트의 주문 버튼은 localhost에서 열 때만 API(http://localhost:3000)에 연결(SITE.api). 공개 사이트는 서버 배포 전까지 안내 문구만.
+- 2026-10-07: 관리자는 1명. 계정은 .env(ADMIN_ID, ADMIN_PASSWORD_HASH=scrypt), 로그인 쿠키 12시간, 5회 실패 시 15분 잠금. 관리자 화면은 사이트가 아니라 서버의 /admin. 범위는 상품·패키지부터. 서버 폴더는 비공개 저장소로.
