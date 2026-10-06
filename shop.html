@@ -18,6 +18,8 @@
   <script src="js/common.js"></script>
   <script src="js/print.js"></script>
   <script>
+  // 상품 데이터(서버 또는 data.js)가 준비된 뒤 실행
+  dataReady.then(() => {
     const cat = qs.get('cat') || 'all';
     const q = (qs.get('q') || '').trim();
 
@@ -46,6 +48,7 @@
            <a class="btn primary small" href="shop.html">전체 상품 보기</a>
          </div>`;
     drawIn(document);
+  });
   </script>
 </body>
 </html>

@@ -45,7 +45,7 @@ const pkgCard = (s) => `
     <div class="pkg-stage">${book(s.en, s.cover)}</div>
     <h3>${esc(s.name)}</h3>
     <p class="pkg-price">${priceHtml(s)}</p>
-    <dl class="spec"><dt>기간</dt><dd>${s.period}</dd><dt>시안</dt><dd>${s.drafts}</dd><dt>수정</dt><dd>${s.revisions}</dd></dl>
+    <dl class="spec"><dt>기간</dt><dd>${esc(s.period)}</dd><dt>시안</dt><dd>${esc(s.drafts)}</dd><dt>수정</dt><dd>${esc(s.revisions)}</dd></dl>
   </a>`;
 
 // 진행 순서

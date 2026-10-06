@@ -44,3 +44,4 @@
 - 2026-10-07: 사이트의 주문 버튼은 localhost에서 열 때만 API(http://localhost:3000)에 연결(SITE.api). 공개 사이트는 서버 배포 전까지 안내 문구만.
 - 2026-10-07: 관리자는 1명. 계정은 .env(ADMIN_ID, ADMIN_PASSWORD_HASH=scrypt), 로그인 쿠키 12시간, 5회 실패 시 15분 잠금. 관리자 화면은 사이트가 아니라 서버의 /admin. 범위는 상품·패키지부터. 서버 폴더는 비공개 저장소로.
 - 2026-10-07: 상품 사진은 서버 uploads/ 폴더에 저장, DB에는 'uploads/파일' 경로만. jpg/png/webp(파일 바이트로 판별), 5MB·10장. 사진은 상품에만(패키지는 책 표지 그래픽).
+- 2026-10-07: 사이트는 SITE.api가 있으면 API에서 상품을 받아 PRODUCTS/SERVICES를 바꾸고(dataReady), 없거나 실패하면 data.js. 사진 축소는 서버 라이브러리 대신 관리자 브라우저에서(canvas, 1600px webp). 백업은 npm run backup(DB+uploads, 14개 보관).

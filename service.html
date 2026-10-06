@@ -30,6 +30,8 @@
   <script src="js/common.js"></script>
   <script src="js/print.js"></script>
   <script>
+  // 상품 데이터(서버 또는 data.js)가 준비된 뒤 실행
+  dataReady.then(() => {
     document.getElementById('pkg-grid').innerHTML = SERVICES.map(pkgCard).join('');
     document.getElementById('process-steps').innerHTML = processHtml();
 
@@ -39,14 +41,15 @@
       <thead><tr><th scope="col"><span class="sr-only">항목</span></th>${SERVICES.map((x) => `<th scope="col"><a href="product.html?id=${x.id}">${esc(x.name)}</a></th>`).join('')}</tr></thead>
       <tbody>
         ${row('가격', priceHtml, 'num')}
-        ${row('작업 기간', (x) => x.period)}
-        ${row('시안', (x) => x.drafts)}
-        ${row('수정', (x) => x.revisions)}
+        ${row('작업 기간', (x) => esc(x.period))}
+        ${row('시안', (x) => esc(x.drafts))}
+        ${row('수정', (x) => esc(x.revisions))}
         ${row('포함 내역', (x) => `<ul>${x.includes.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`)}
-        ${row('전달', (x) => x.delivery)}
+        ${row('전달', (x) => esc(x.delivery))}
       </tbody>
       <tfoot><tr><td></td>${SERVICES.map((x) => `<td><a class="btn line" href="product.html?id=${x.id}">자세히 보기</a></td>`).join('')}</tr></tfoot>`;
     drawIn(document);
+  });
   </script>
 </body>
 </html>

@@ -85,7 +85,7 @@ function productImg(p, i, cls = '') {
   const src = p.images[i];
   if (!src && i === 0 && p.mock && typeof productMock === 'function') return productMock(p, cls); // print.js
   return src
-    ? `<img class="${cls}" src="${src}" alt="${i === 0 ? esc(p.name) : ''}" loading="lazy">`
+    ? `<img class="${cls}" src="${esc(src)}" alt="${i === 0 ? esc(p.name) : ''}" loading="lazy">`
     : `<div class="ph ph-${i === 0 ? 'a' : 'b'} ${cls}" ${i === 0 ? `role="img" aria-label="${esc(p.name)}"` : 'aria-hidden="true"'}></div>`;
 }
 const hasSecond = (p) => (p.images.length === 0 && !p.mock) || !!p.images[1];
@@ -316,8 +316,28 @@ function renderFooter() {
   </footer>`);
 }
 
-renderHeader();
-renderFooter();
-updateBagCount();
-initHalftones();
+// ===== 상품 데이터 불러오기 =====
+// 서버(SITE.api)가 있으면 관리자에서 고친 상품·패키지를 받아 data.js 값을 바꾼다.
+// 서버가 없거나(공개 사이트) 꺼져 있으면 data.js 그대로 보여준다. 페이지 스크립트는 dataReady.then() 안에서 실행.
+const dataReady = (async () => {
+  if (!SITE.api) return;
+  try {
+    const res = await fetch(`${SITE.api}/api/products`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const list = await res.json();
+    // 서버에 올린 사진(uploads/...)은 서버 주소를 붙여야 보인다
+    const withImages = (p) => ({ ...p, images: (p.images || []).map((src) => (src.startsWith('uploads/') ? `${SITE.api}/${src}` : src)) });
+    PRODUCTS.splice(0, PRODUCTS.length, ...list.filter((p) => p.type === 'product').map(withImages));
+    SERVICES.splice(0, SERVICES.length, ...list.filter((p) => p.type === 'package'));
+  } catch (err) {
+    console.warn('상품 서버에 연결하지 못해 data.js로 표시합니다.', err);
+  }
+})();
+
+dataReady.then(() => {
+  renderHeader();
+  renderFooter();
+  updateBagCount();
+  initHalftones();
+});
 document.title = document.title ? `${document.title} | ${SITE.name}` : SITE.name;

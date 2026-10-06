@@ -20,6 +20,8 @@
   <script src="js/common.js"></script>
   <script src="js/print.js"></script>
   <script>
+  // 상품 데이터(서버 또는 data.js)가 준비된 뒤 실행
+  dataReady.then(() => {
     const box = document.getElementById('cart');
 
     function render() {
@@ -49,7 +51,7 @@
               <div>
                 <a class="cart-item-name" href="product.html?id=${p.id}">${esc(p.name)}</a>
                 ${isService(p)
-                  ? `<p class="cart-item-unit">패키지 1건 / 작업 기간 ${p.period}</p>`
+                  ? `<p class="cart-item-unit">패키지 1건 / 작업 기간 ${esc(p.period)}</p>`
                   : `<p class="cart-item-unit">${won(p.price)}</p>
                 <div class="qty">
                   <button type="button" data-action="dec" aria-label="${esc(p.name)} 수량 줄이기">−</button>
@@ -127,6 +129,7 @@
     });
 
     render();
+  });
   </script>
 </body>
 </html>

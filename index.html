@@ -69,6 +69,8 @@
   <script src="js/common.js"></script>
   <script src="js/print.js"></script>
   <script>
+  // 상품 데이터(서버 또는 data.js)가 준비된 뒤 실행
+  dataReady.then(() => {
     // 첫 화면
     const heroVisual = document.getElementById('hero-visual');
     heroVisual.innerHTML = riso({ theme: 'paper', shape: 'sphere' }, 'hero-riso') +
@@ -101,6 +103,7 @@
         heroBook.style.setProperty('--rx', `${my * -6}deg`);
       });
     }
+  });
   </script>
 </body>
 </html>
